@@ -5,6 +5,7 @@ import { createCanvas, loadImage, registerFont } from 'canvas';
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
+import { setupWebhook } from './webhookConfig';
 
 // Load environment variables
 dotenv.config();
@@ -548,24 +549,28 @@ ctx.fillText(`$${finalUsd.toLocaleString('en-US', { minimumFractionDigits: 2, ma
   return canvas.toBuffer();
 }
 
-// Launch the bot
-bot.launch().then(() => {
-  console.log('Bot is running!');
+// Start the bot
+const startBot = async () => {
+  // Sprawdź, czy musimy skonfigurować webhooki
+  const isWebhook = await setupWebhook(bot);
   
-  // Set bot command menu to show gen_card first
-  bot.telegram.setMyCommands([
-    { command: 'gen_card', description: 'Generate a trading card 🖼️' },
-    { command: 'help', description: 'Show help information 💡' },
-    { command: 'cancel', description: 'Cancel current operation ❌' }
-  ]).then(() => {
-    console.log('Command menu updated successfully');
-  }).catch(err => {
-    console.error('Failed to update command menu:', err);
-  });
-}).catch(err => {
-  console.error('Failed to start bot:', err);
-});
+  // Jeśli nie używamy webhooka (lokalny rozwój), uruchom z pollingiem
+  if (!isWebhook) {
+    bot.launch().then(() => {
+      console.log('Bot is running in polling mode!');
+      
+      // Ustaw menu poleceń bota
+      bot.telegram.setMyCommands([
+        { command: 'gen_card', description: 'Generate a trading card 🖼️' },
+        { command: 'help', description: 'Show help information 💡' },
+        { command: 'cancel', description: 'Cancel current operation ❌' }
+      ]).catch(err => {
+        console.error('Failed to update command menu:', err);
+      });
+    }).catch(err => {
+      console.error('Failed to start bot:', err);
+    });
+  }
+};
 
-// Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+startBot();

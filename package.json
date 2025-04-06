@@ -13,10 +13,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/express": "^5.0.1",
     "@types/node": "^22.13.14",
     "axios": "^1.8.4",
+    "body-parser": "^2.2.0",
     "canvas": "^3.1.0",
     "dotenv": "^16.4.7",
+    "express": "^5.1.0",
     "telegraf": "^4.16.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
